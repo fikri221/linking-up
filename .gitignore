@@ -1,0 +1,36 @@
+# Node.js dependencies
+node_modules/
+
+# Environment variables
+.env
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary directories and files
+dist/
+build/
+tmp/
+coverage/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp
+
+# Compiled files
+src/**/*.js.map
+src/**/*.d.ts
+
+# Optional: Lock files (uncomment if not needed in version control)
+package-lock.json
+# yarn.lock
+
+# Others (add any custom paths you want to ignore)

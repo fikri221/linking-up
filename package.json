@@ -1,0 +1,14 @@
+{
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.11.2",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "graphql": "^16.9.0",
+    "mongoose": "^8.8.2"
+  }
+}
