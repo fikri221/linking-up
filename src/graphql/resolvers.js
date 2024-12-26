@@ -1,20 +1,15 @@
 import ChatRoom from "../models/chat_room.js";
 import Message from "../models/message.js";
 import User from "../models/user.js";
+import signToken from "../utils/sign_token.js";
 import bcrypt from "bcryptjs";
-
-// Salt
-const SALT_ROUNDS = 12;
-
-// JWT Secret Key
-const SECRET_KEY = "just-a-secret";
 
 // Define resolvers
 const resolvers = {
   Query: {
-    users: async () => {
+    contacts: async (_, __, { user }) => {
       try {
-        const users = await User.find();
+        const users = await User.find({ username: { $ne: user.username } });
         return users;
       } catch (err) {
         throw new Error("Error retrieving users");
@@ -33,33 +28,49 @@ const resolvers = {
 
   Mutation: {
     // User handler
-    createUser: async (_, { username, email, password }) => {
+    signUp: async (_, { username, email, password }) => {
+      // Check if user already exists
+      let user = await User.findOne({ email: email });
+      if (user) {
+        throw new Error("User already exists");
+      }
+
+      // Salt
+      const SALT_ROUNDS = await bcrypt.genSalt(10);
+
+      // Save new user
       const newUser = new User({
         username,
         email,
         password: await bcrypt.hash(password, SALT_ROUNDS),
       });
       await newUser.save();
-      return newUser;
+      const token = signToken({
+        username: newUser.username,
+        email: newUser.email,
+      });
+
+      return {
+        ...newUser._doc,
+        token,
+      };
     },
 
     // Auth handler
     login: async (_, { email, password }) => {
-      if (!email) {
-        throw Error("Email cannot be empty");
-      }
-      if (!password) {
-        throw Error("Password cannot be empty");
-      }
+      // Check if user is exist
       let user = await User.findOne({ email: email });
       if (!user) {
-        throw Error("Email not found");
+        throw new Error("Email not found");
       }
       if (!(await bcrypt.compare(password, user.password))) {
-        throw Error("Incorrect password");
+        throw new Error("Invalid password");
       }
 
-      return user;
+      return {
+        username: user.username,
+        token: signToken({ username: user.username, email: user.email }),
+      };
     },
     changePassword: async (_, { email, credentials }) => {
       const { old_password, new_password } = credentials;
@@ -85,38 +96,40 @@ const resolvers = {
 
     // Message handler
     addMessage: async (_, { senderId, recipientId, content }) => {
-      try {
-        let chatRoom = await ChatRoom.findOne({
-          participants: { $all: [senderId, recipientId] },
-        });
+      // Find the chat room where the users are inside
+      let chatRoom = await ChatRoom.findOne({
+        participants: { $all: [senderId, recipientId] },
+      });
 
-        if (!chatRoom) {
-          chatRoom = new ChatRoom({
-            participants: [senderId, recipientId],
-            createdAt: new Date(),
-          });
-          await chatRoom.save();
-        }
-
-        console.log(chatRoom._id);
-
-        const message = new Message({
-          chatRoomId: chatRoom._id,
-          sender: senderId,
-          content,
-          isRead: false,
+      // If the chat room is not found then create a new chat room
+      if (!chatRoom) {
+        chatRoom = new ChatRoom({
+          participants: [senderId, recipientId],
           createdAt: new Date(),
         });
-        await message.save();
-
-        // Populate the sender field with user data before returning
-        const populatedMessage = await Message.findById(message._id).populate(
-          "sender"
-        );
-        return populatedMessage;
-      } catch (err) {
-        throw new Error("Error creating message");
+        await chatRoom.save();
       }
+
+      // Insert first message into chat room
+      const message = new Message({
+        chatRoomId: chatRoom._id,
+        sender: senderId,
+        content,
+        isRead: false,
+        createdAt: new Date(),
+      });
+      await message.save();
+
+      // Populate the sender field with user data before returning
+      const populatedMessage = await Message.findById(message._id).populate(
+        "sender"
+      );
+
+      if (!populatedMessage.sender) {
+        throw new Error("Sender not found");
+      }
+
+      return populatedMessage;
     },
   },
 };

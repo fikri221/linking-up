@@ -5,10 +5,11 @@ const messageSchema = new mongoose.Schema({
   content: String,
   isRead: Boolean,
   createdAt: { type: Date, default: Date.now() },
-  sender: { 
+  sender: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // Reference the User model
-   },
+    required: true,
+  },
 });
 
 const Message = mongoose.model("Message", messageSchema);

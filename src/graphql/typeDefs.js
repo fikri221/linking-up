@@ -1,10 +1,11 @@
 // Define your GraphQL schema
+// dapat digunakan juga sebagai response data
 const typeDefs = `#graphql
   type User {
     id: ID!
     username: String!
     email: String!
-    password: String!
+    token: String!
   }
 
   type Message {
@@ -12,7 +13,7 @@ const typeDefs = `#graphql
     chatRoomId: ChatRoom!
     content: String!
     createdAt: String!
-    sender: User!
+    sender: User
     isRead: Boolean!
   }
 
@@ -23,8 +24,12 @@ const typeDefs = `#graphql
     createdAt: String!
   }
 
+  type AuthPayload {
+    token: String!
+  }
+
   type Query {
-    users: [User!]!
+    contacts: [User!]!
     messages(chatRoomId: ID!): [Message]
   }
 
@@ -34,9 +39,9 @@ const typeDefs = `#graphql
   }
 
   type Mutation {
-    createUser(username: String!, email: String!, password: String!): User!
+    signUp(username: String!, email: String!, password: String!): User!
 
-    login(email: String!, password: String!): User!
+    login(email: String!, password: String!): AuthPayload!
     changePassword(email: String!, credentials: UserChangePasswordInput): User!
 
     addMessage(senderId: ID!, recipientId: ID!, content: String!): Message!
