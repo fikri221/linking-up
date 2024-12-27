@@ -31,6 +31,7 @@ const typeDefs = `#graphql
   type Query {
     contacts: [User!]!
     messages(chatRoomId: ID!): [Message]
+    chatRooms: [ChatRoom!]!
   }
 
   input UserChangePasswordInput {
@@ -42,7 +43,7 @@ const typeDefs = `#graphql
     signUp(username: String!, email: String!, password: String!): User!
 
     login(email: String!, password: String!): AuthPayload!
-    changePassword(email: String!, credentials: UserChangePasswordInput): User!
+    changePassword(credentials: UserChangePasswordInput): User!
 
     addMessage(senderId: ID!, recipientId: ID!, content: String!): Message!
     editMessage(messageId: ID!, content: String!): Message!
