@@ -6,7 +6,7 @@ import authMiddleware from "./src/utils/auth_middleware.js";
 connectDB();
 
 const { url } = await startStandaloneServer(server, {
-  context: async ({ req }) => {
+  context: async ({ req, res }) => {
     // Mendapatkan nama operasi GraphQL
     const operationName = req.body.operationName;
 
@@ -15,12 +15,12 @@ const { url } = await startStandaloneServer(server, {
 
     if (excludedOperations.includes(operationName)) {
       // console.log("Operation excluded from auth:", operationName);
-      return; // Tidak ada user dalam konteks
+      return { req, res }; // Tidak ada user dalam konteks
     }
 
     // Jalankan middleware autentikasi
     const user = authMiddleware(req.headers);
-    return { user };
+    return { user, req, res };
   },
   listen: { port: 4000 },
 });
