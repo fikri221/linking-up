@@ -4,6 +4,7 @@ const messageSchema = new mongoose.Schema(
   {
     chatRoomId: { type: mongoose.Schema.Types.ObjectId, ref: "ChatRoom" },
     content: String,
+    aiResponse: String,
     isRead: Boolean,
     createdAt: { type: Date, default: Date.now() },
     sender: {
