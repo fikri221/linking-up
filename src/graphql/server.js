@@ -6,6 +6,10 @@ import resolvers from "./resolvers.js";
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  cors: {
+    origin: "http://localhost:4000",
+    credentials: true,
+  }
 });
 
 export default server;
