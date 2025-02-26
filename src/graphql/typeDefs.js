@@ -28,6 +28,10 @@ const typeDefs = `#graphql
     token: String!
   }
 
+  type MessageResponse {
+    message: String
+  }
+
   type Query {
     contacts: [User!]!
     messages(chatRoomId: ID!): [Message]
@@ -41,8 +45,8 @@ const typeDefs = `#graphql
 
   type Mutation {
     signUp(username: String!, email: String!, password: String!): User!
-
     login(email: String!, password: String!): AuthPayload!
+    logout: MessageResponse
     changePassword(credentials: UserChangePasswordInput): User!
 
     addMessage(senderId: ID!, recipientId: ID!, content: String!): Message!
